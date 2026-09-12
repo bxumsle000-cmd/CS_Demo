@@ -1,0 +1,52 @@
+services:
+  # --------------------------------------------------------------------------
+  # 資料庫：SQL Server 2022
+  # --------------------------------------------------------------------------
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    # 容器名稱是「整台電腦共用」的，不分專案，所以一定要跟其他專案錯開。
+    container_name: cs-db
+    # 左邊是你電腦的埠號，右邊是容器內的
+    ports:
+      - "14334:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Cs_Ticket_2648"
+      MSSQL_PID: "Developer"          # 開發用授權，免費
+    volumes:
+      - mssql-data:/var/opt/mssql     # 具名 volume，資料才不會隨容器消失
+    restart: unless-stopped
+    healthcheck:
+      # 讓 compose 知道「資料庫真的可以接受連線了」，不然 app 會太早啟動而連不上
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  # --------------------------------------------------------------------------
+  # 建立資料庫：跑一次就結束的一次性容器
+  #
+  # 為什麼需要這個？因為 Flyway 建得了「資料表」，建不了「資料庫」本身；
+  # 而 SQL Server 的官方 image 不像 MySQL/Postgres 有環境變數可以自動建 DB，
+  # 所以要自己補這一步。
+  # --------------------------------------------------------------------------
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cs-db-init
+    depends_on:
+      db:
+        condition: service_healthy    # 等 db 通過上面的 healthcheck 才開始
+    environment:
+      MSSQL_SA_PASSWORD: "Cs_Ticket_2648"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >
+        /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}" -C
+        -Q "IF DB_ID('customer_service') IS NULL CREATE DATABASE customer_service;"
+    restart: "no"                     # 跑完就結束，不要重啟
+
+volumes:
+  # 具名 volume 會自動加上專案名前綴（customerservice_mssql-data），
+  # 所以跟 SlotMachineGame 的同名 volume 不會混在一起，這裡不用改名。
+  mssql-data:
