@@ -8,7 +8,7 @@
         <relativePath/>
     </parent>
     <groupId>com.poz</groupId>
-    <artifactId>CustomerService</artifactId>
+    <artifactId>CS_Demo</artifactId>
     <version>1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,3 +1,36 @@
+# ============================================================================
+# 第一次跑 / 換一台新電腦
+#     docker compose up -d
+#     然後 IDEA 按 Run
+#
+# 整組砍掉重來（會清空所有工單與客服帳號）
+#     docker compose down -v
+#     docker compose up -d
+#     然後 IDEA 按 Run
+#
+# 完整驗收，app 也跑在容器裡（第一次，或改過程式碼）
+#     docker compose --profile full up -d --build
+#     → http://localhost:8081
+#
+# 完整驗收，沒改過程式碼（含電腦重開後要再開一次）
+#     docker compose --profile full up -d
+#     → http://localhost:8081
+#
+# 看容器版 app 的 log
+#     docker compose logs -f app
+#
+# 關掉容器版 app，資料庫繼續留著
+#     docker compose stop app
+#
+# 全部關掉，資料保留
+#     docker compose down
+#
+# 用 SSMS 連進容器裡的資料庫
+#     伺服器名稱：localhost,14335
+#     驗證：SQL Server 驗證
+#     登入：sa
+#     密碼：見下方 MSSQL_SA_PASSWORD
+# ============================================================================
 services:
   # --------------------------------------------------------------------------
   # 資料庫：SQL Server 2022
@@ -5,13 +38,13 @@ services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     # 容器名稱是「整台電腦共用」的，不分專案，所以一定要跟其他專案錯開。
-    container_name: cs-db
+    container_name: cs-demo-db
     # 左邊是你電腦的埠號，右邊是容器內的
     ports:
-      - "14334:1433"
+      - "14335:1433"
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Cs_Ticket_2648"
+      MSSQL_SA_PASSWORD: "Csumsle1247"
       MSSQL_PID: "Developer"          # 開發用授權，免費
     volumes:
       - mssql-data:/var/opt/mssql     # 具名 volume，資料才不會隨容器消失
@@ -33,12 +66,12 @@ services:
   # --------------------------------------------------------------------------
   db-init:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: cs-db-init
+    container_name: cs-demo-db-init
     depends_on:
       db:
         condition: service_healthy    # 等 db 通過上面的 healthcheck 才開始
     environment:
-      MSSQL_SA_PASSWORD: "Cs_Ticket_2648"
+      MSSQL_SA_PASSWORD: "Csumsle1247"
     entrypoint: ["/bin/bash", "-c"]
     command:
       - >
