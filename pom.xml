@@ -75,6 +75,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--   Spring Boot 4.x 把 @WebMvcTest 這類測試切片拆成獨立 starter，
+               只有 starter-test 找不到 @WebMvcTest，需要另外加這個   -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!--   lombok     -->
         <dependency>
             <groupId>org.projectlombok</groupId>
