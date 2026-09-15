@@ -28,13 +28,5 @@ public class AuthController {
     public void me() {
     }
 
-    /** 建立客服帳號 */
-    @PostMapping("/register")
-    public void register() {
-    }
 
-    /** 修改密碼 */
-    @PutMapping("/password")
-    public void changePassword() {
-    }
 }

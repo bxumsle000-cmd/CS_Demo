@@ -1,8 +1,8 @@
 package com.poz.cs_demo.service;
 
-import com.poz.cs_demo.dto.AgentResponse;
-import com.poz.cs_demo.dto.LoginRequest;
-import com.poz.cs_demo.dto.LoginResponse;
+import com.poz.cs_demo.dto.agent.AgentResponse;
+import com.poz.cs_demo.dto.auth.LoginRequest;
+import com.poz.cs_demo.dto.auth.LoginResponse;
 import com.poz.cs_demo.entity.Agent;
 import com.poz.cs_demo.enums.AgentStatus;
 import com.poz.cs_demo.exception.ApiException;
@@ -13,6 +13,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 登入 / 認證相關的業務邏輯。
+ * <p>
+ * 提供的方法：
+ * <ul>
+ *   <li>{@link #login(LoginRequest)}：登入</li>
+ *   <li>{@link #logout()}：登出</li>
+ *   <li>{@link #me()}：取得目前登入者資料</li>
+ * </ul>
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -20,20 +30,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final CurrentAgent currentAgent;
 
-    /**
-     * 帳號不存在與密碼錯誤都回同一句話，
-     * 避免讓外人靠錯誤訊息推測哪些帳號存在。
-     */
 
+    /**
+     * 登入：驗證帳號密碼，成功後把狀態設為 ONLINE 並回傳 token。
+     *
+     * @param request agentId（客服代號）、password（明碼密碼）
+     * @return agentId 與登入 token
+     */
     @Transactional()
     public LoginResponse login(LoginRequest request) {
-        // 1. 是否有這個 id
-        //    findById 回傳 Optional<Agent>：有就拿出來，沒有就丟 401
         Agent agent = agentRepository.findById(request.agentId())
                 .orElseThrow(() -> ApiException.unauthorized("帳號或密碼錯誤"));
 
-        // 2. 密碼是否正確
-        //    matches(明文, 雜湊值)：BCrypt 會自己從雜湊值取出 salt 再比對，不能用 equals
         if (!passwordEncoder.matches(request.password(), agent.getPasswordHash())) {
             throw ApiException.unauthorized("帳號或密碼錯誤");
         }
@@ -43,10 +51,18 @@ public class AuthService {
         return new LoginResponse(request.agentId(),currentAgent.currentToken());
     }
 
+    /**
+     * 登出（尚未實作）。
+     */
     @Transactional
     public void logout(){
     }
 
+    /**
+     * 取得目前登入者的資料（不含密碼）。
+     *
+     * @return 目前登入者的 agentId、name、status
+     */
     @Transactional
     public AgentResponse me(){
         Agent agent = agentRepository.findById(currentAgent.currentAgentId())
@@ -55,7 +71,4 @@ public class AuthService {
         return  AgentResponse.from(agent);
     }
 
-
 }
-
-
