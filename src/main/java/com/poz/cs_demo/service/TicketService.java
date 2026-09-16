@@ -47,4 +47,6 @@ public class TicketService {
                 request.toPageable()
         ).map(SearchTicketResponse::from);
     }
+
+
 }

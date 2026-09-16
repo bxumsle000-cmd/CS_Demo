@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 工單 Repository。
@@ -56,4 +58,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
                         LocalDateTime updatedFrom,
                         LocalDateTime updatedTo,
                         Pageable pageable);
+
+    Optional<Ticket> findByTicketNo(String ticketNo);
 }

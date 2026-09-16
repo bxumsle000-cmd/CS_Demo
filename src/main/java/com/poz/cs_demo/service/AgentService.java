@@ -2,7 +2,7 @@ package com.poz.cs_demo.service;
 
 import com.poz.cs_demo.dto.agent.ChangePasswordRequest;
 import com.poz.cs_demo.dto.agent.RegisterRequest;
-import com.poz.cs_demo.dto.agent.UpdateStatusRequest;
+import com.poz.cs_demo.dto.agent.UpdateAgentStatusRequest;
 import com.poz.cs_demo.entity.Agent;
 import com.poz.cs_demo.enums.AgentStatus;
 import com.poz.cs_demo.exception.ApiException;
@@ -75,7 +75,7 @@ public class AgentService {
 
 
     @Transactional
-    public void updateStatus(UpdateStatusRequest request) {
+    public void updateStatus(UpdateAgentStatusRequest request) {
         Agent agent = agentRepository.findById(currentAgent.currentAgentId())
                 .orElseThrow(() -> ApiException.unauthorized("登入已失效"));
 
