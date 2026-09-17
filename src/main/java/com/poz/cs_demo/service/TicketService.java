@@ -16,6 +16,7 @@ import com.poz.cs_demo.security.CurrentAgent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +36,18 @@ public class TicketService {
      * @param request 表單內容；assigneeId 為 null 或空字串時，負責人為目前登入者
      * @param channel 派單來源，PHONE 或 AGENT
      */
+    @Transactional
     public void createTicket(CreateTicketRequest request, TicketChannel channel){
-        // 沒勾「轉派給其他客服」時 assigneeId 不會帶，預設由自己負責
-        String assigneeId = request.assigneeId();
-        if (assigneeId == null || assigneeId.isBlank()) {
-            assigneeId = currentAgent.currentAgentId();
-        }
+        // 建立工單的人 = 目前登入者，處理記錄要記在他名下
+        Agent operator = agentRepository.findById(currentAgent.currentAgentId())
+                .orElseThrow(() -> ApiException.unauthorized("登入已失效"));
 
-        Agent agent = agentRepository.findById(assigneeId)
-                .orElseThrow( ()-> ApiException.unauthorized("查無此客服"));
+        // 沒勾「轉派給其他客服」時 assigneeId 不會帶，負責人就是自己；有勾才另外查
+        Agent assignee = operator;
+        if (request.assigneeId() != null && !request.assigneeId().isBlank()) {
+            assignee = agentRepository.findById(request.assigneeId())
+                    .orElseThrow(() -> ApiException.notFound("查無此客服"));
+        }
 
         Ticket ticket = Ticket.builder()
                 .title(request.title())
@@ -51,22 +55,26 @@ public class TicketService {
                 .contactPhone(request.contactPhone())
                 .category(request.category())
                 .channel(channel)
-                .assignee(agent)
+                .assignee(assignee)
                 .description(request.description())
                 .status(request.status())
                 .build();
         ticketRepository.save(ticket);
 
+        String content = channel == TicketChannel.PHONE
+                ? "工單經電話進線建立"
+                : "工單由客服手動建立";
+
         TicketComment ticketComment = TicketComment.builder()
                 .ticket(ticket)
-                .agent(agent)
-                .content("系統 · 工單經電話進線建立")
+                .agent(operator)
+                .content(content)
                 .build();
         ticketCommentRepository.save(ticketComment);
-
     }
 
     /** 工單列表搜尋（分頁），條件整理與分頁設定都在 SearchTicketRequest 裡做完了 */
+    @Transactional(readOnly = true)
     public Page<SearchTicketResponse> search(SearchTicketRequest request) {
         return ticketRepository.search(
                 request.ticketNo(),
