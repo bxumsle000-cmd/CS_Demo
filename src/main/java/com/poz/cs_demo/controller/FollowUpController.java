@@ -19,6 +19,11 @@ public class FollowUpController {
     public void list() {
     }
 
+    @GetMapping("tickets")
+    public void getNonFinishTickets(){
+
+    }
+
     /** 加入案件到某一天（同一張工單已有安排則覆蓋） */
     @PostMapping
     public void create() {

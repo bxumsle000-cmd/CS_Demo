@@ -60,4 +60,24 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
                         Pageable pageable);
 
     Optional<Ticket> findByTicketNo(String ticketNo);
+
+    /**
+     * 查某個客服名下「還在處理」的工單，給行事曆「加入案件到這天」的下拉選單用。
+     * <p>
+     * 狀態直接寫死 IN (IN_PROGRESS, PENDING)：畫面備註「只列出處理中 / 等待客戶回覆」
+     * 是固定的業務規則，不需要由呼叫端決定。刻意用 IN 明確列出、而不是寫 <> RESOLVED，
+     * 這樣未來若新增其他狀態，不會莫名其妙跑進下拉選單。
+     * <p>
+     * assignee.agentId 剛好是 Agent 的主鍵，Hibernate 會直接拿 tickets.assignee_id 比對，
+     * 不會真的去 join agents；下拉選單也不顯示客服，所以不必 FETCH。
+     * 下拉選單一次全列，沒有分頁，回 List。
+     */
+    @Query("""
+            SELECT t
+            FROM Ticket t
+            WHERE t.assignee.agentId = :agentId
+              AND t.status IN (IN_PROGRESS, PENDING)
+            ORDER BY t.updatedAt DESC
+            """)
+    List<Ticket> findOpenByAssignee(String agentId);
 }

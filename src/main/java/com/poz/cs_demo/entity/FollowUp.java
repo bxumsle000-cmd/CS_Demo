@@ -9,22 +9,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 /**
  * 行事曆回電安排，對應資料表 follow_ups。
+ * <p>
+ * 同一客服對同一張工單可以排任意多筆安排，時間重複也不限制，
+ * 所以沒有 (agent_id, ticket_id, follow_up_at) 的唯一鍵（V2 已移除）。
  */
 @Entity
-@Table(
-        name = "follow_ups",
-        uniqueConstraints = @UniqueConstraint(
-                name = "UQ_follow_ups_agent_ticket_time",
-                columnNames = {"agent_id", "ticket_id", "follow_up_at"}
-        )
-)
+@Table(name = "follow_ups")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
