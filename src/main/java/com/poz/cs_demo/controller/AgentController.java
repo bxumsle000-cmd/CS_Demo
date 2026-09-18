@@ -27,8 +27,8 @@ public class AgentController {
         agentService.register(request);
     }
 
-    /** 修改密碼 */
-    @PutMapping("/password")
+    /** 修改自己的密碼（與 /me/status 一樣改的是目前登入者，路徑統一掛在 /me 下） */
+    @PutMapping("/me/password")
     public void changePassword(@RequestBody ChangePasswordRequest request) {
         agentService.changePassword(request);
     }

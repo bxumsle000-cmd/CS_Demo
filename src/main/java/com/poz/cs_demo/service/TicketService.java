@@ -1,6 +1,7 @@
 package com.poz.cs_demo.service;
 
 
+import com.poz.cs_demo.dto.ticket.AssigneeResponse;
 import com.poz.cs_demo.dto.ticket.CreateTicketRequest;
 import com.poz.cs_demo.dto.ticket.SearchTicketRequest;
 import com.poz.cs_demo.dto.ticket.SearchTicketResponse;
@@ -15,8 +16,11 @@ import com.poz.cs_demo.repository.TicketRepository;
 import com.poz.cs_demo.security.CurrentAgent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 工單建立與列表查詢的業務邏輯。
@@ -25,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <ul>
  *   <li>{@link #createTicket(CreateTicketRequest, TicketChannel)}：建立工單並留下第一筆處理記錄</li>
  *   <li>{@link #search(SearchTicketRequest)}：工單列表搜尋（分頁）</li>
+ *   <li>{@link #getAssignees()}：「轉派給其他客服」下拉選單的客服清單</li>
  * </ul>
  * <p>
  * 單張工單的詳情、改狀態、轉接在 {@link TicketDetailService}；這裡只管「開單」與「找單」。
@@ -97,6 +102,22 @@ public class TicketService {
                 request.updatedToExclusive(),
                 request.toPageable()
         ).map(SearchTicketResponse::from);
+    }
+
+    /**
+     * 「轉派給其他客服」下拉選單的選項：所有客服的代號與姓名。
+     * <p>
+     * 建單與詳情頁轉派都會用到，所以放在這裡而不是 TicketDetailService。
+     * 一次全列、沒有分頁；要不要把「自己」或「目前負責人」濾掉交給前端決定。
+     *
+     * @return 所有客服，只含代號與姓名，依代號排序
+     */
+    @Transactional(readOnly = true)
+    public List<AssigneeResponse> getAssignees() {
+        return agentRepository.findAll(Sort.by("agentId"))
+                .stream()
+                .map(AssigneeResponse::from)
+                .toList();
     }
 
 

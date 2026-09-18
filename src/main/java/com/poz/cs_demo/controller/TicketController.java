@@ -1,5 +1,6 @@
 package com.poz.cs_demo.controller;
 
+import com.poz.cs_demo.dto.ticket.AssigneeResponse;
 import com.poz.cs_demo.dto.ticket.CreateTicketRequest;
 import com.poz.cs_demo.dto.ticket.SearchTicketRequest;
 import com.poz.cs_demo.dto.ticket.SearchTicketResponse;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 工單相關 API。
@@ -27,6 +30,15 @@ public class TicketController {
     @GetMapping
     public Page<SearchTicketResponse> search(SearchTicketRequest request) {
         return ticketService.search(request);
+    }
+
+    /**
+     * 「轉派給其他客服」下拉選單的客服清單（代號 + 姓名）。
+     * 路徑用 assignees 這個固定字，Spring 會優先配對固定字、不會誤當成 {ticketNo}。
+     */
+    @GetMapping("/assignees")
+    public List<AssigneeResponse> assignees() {
+        return ticketService.getAssignees();
     }
 
     /** 建立工單 from call */

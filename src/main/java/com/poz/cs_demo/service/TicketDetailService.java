@@ -57,7 +57,7 @@ public class TicketDetailService {
      * @PreUpdate 也會順便更新 updatedAt。
      *
      * @param ticketNo 單號；不存在回 404
-     * @param request  status（新狀態：PENDING / RESOLVED / IN_PROGRESS）
+     * @param request  status（新狀態：PENDING / RESOLVED / IN_PROGRESS）；與目前狀態相同回 400
      * @return 更新後的工單內容與處理記錄
      */
     @Transactional
@@ -66,6 +66,10 @@ public class TicketDetailService {
         Ticket ticket = findTicketOrThrow(ticketNo);
 
         TicketStatus oldStatus = ticket.getStatus();   // 先記下舊狀態，setStatus 之後就拿不到了
+        // 狀態沒變就不做事，否則會留下「由 RESOLVED 變更為 RESOLVED」這種沒意義的記錄
+        if (oldStatus == request.status()) {
+            throw ApiException.badRequest("工單目前已經是 " + oldStatus + " 狀態");
+        }
         ticket.setStatus(request.status());            // ticket 是查出來的，JPA 會自動 UPDATE
 
         addComment(agent, ticket, "狀態由 " + oldStatus + " 變更為 " + request.status());
