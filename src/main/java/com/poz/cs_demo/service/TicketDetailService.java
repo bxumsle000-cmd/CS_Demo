@@ -1,9 +1,6 @@
 package com.poz.cs_demo.service;
 
-import com.poz.cs_demo.dto.detail.TicketCommentResponse;
-import com.poz.cs_demo.dto.detail.TicketDetailResponse;
-import com.poz.cs_demo.dto.detail.UpdateTicketAssigneeRequest;
-import com.poz.cs_demo.dto.detail.UpdateTicketStatusRequest;
+import com.poz.cs_demo.dto.detail.*;
 import com.poz.cs_demo.entity.Agent;
 import com.poz.cs_demo.entity.Ticket;
 import com.poz.cs_demo.entity.TicketComment;
@@ -65,12 +62,13 @@ public class TicketDetailService {
      */
     @Transactional
     public TicketDetailResponse updateStatus(String ticketNo, UpdateTicketStatusRequest request) {
+        Agent agent = currentOperator();
         Ticket ticket = findTicketOrThrow(ticketNo);
 
         TicketStatus oldStatus = ticket.getStatus();   // 先記下舊狀態，setStatus 之後就拿不到了
         ticket.setStatus(request.status());            // ticket 是查出來的，JPA 會自動 UPDATE
 
-        addComment(ticket, currentOperator(), "狀態由 " + oldStatus + " 變更為 " + request.status());
+        addComment(agent, ticket, "狀態由 " + oldStatus + " 變更為 " + request.status());
 
         return TicketDetailResponse.from(ticket, findComments(ticketNo));
     }
@@ -84,13 +82,22 @@ public class TicketDetailService {
      */
     @Transactional
     public TicketDetailResponse assign(String ticketNo, UpdateTicketAssigneeRequest request){
+        Agent agent = currentOperator();
         Ticket ticket = findTicketOrThrow(ticketNo);
         Agent assignedAgent = agentRepository.findById(request.assignId())
                 .orElseThrow(() -> ApiException.notFound("查無此客服"));
         ticket.setAssignee(assignedAgent);
 
-        addComment(ticket, currentOperator(), "由"+currentOperator()+" 轉接給 " + request.assignId());
+        addComment(agent ,ticket,  "由"+currentOperator().getAgentId()+" 轉接給 " + request.assignId());
         return  TicketDetailResponse.from(ticket, findComments(ticketNo));
+    }
+
+    @Transactional
+    public  TicketDetailResponse addComment(String ticketNo, AddTicketCommentRequest request){
+        Agent agent = currentOperator();
+        Ticket ticket = findTicketOrThrow(ticketNo);
+        addComment(agent , ticket, request.content());
+        return  TicketDetailResponse.from(ticket , findComments(ticketNo));
     }
 
 
@@ -126,7 +133,7 @@ public class TicketDetailService {
      * @param agent   留言的客服；系統事件可傳 null
      * @param content 留言內容或系統事件描述
      */
-    private void addComment(Ticket ticket, Agent agent, String content) {
+    private void addComment( Agent agent,Ticket ticket, String content) {
         ticketCommentRepository.save(TicketComment.builder()
                 .ticket(ticket)
                 .agent(agent)
