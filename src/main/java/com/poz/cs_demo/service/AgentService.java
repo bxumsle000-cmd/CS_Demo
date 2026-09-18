@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <ul>
  *   <li>{@link #register(RegisterRequest)}：建立客服帳號</li>
  *   <li>{@link #changePassword(ChangePasswordRequest)}：修改自己的密碼</li>
+ *   <li>{@link #updateStatus(UpdateAgentStatusRequest)}：變更自己的工作狀態</li>
  * </ul>
  */
 @Service
@@ -73,7 +74,13 @@ public class AgentService {
         agentRepository.save(agent);
     }
 
-
+    /**
+     * 變更目前登入者自己的工作狀態（BREAK / RESTROOM / LUNCH / MEETING 或回到 ONLINE）。
+     * <p>
+     * ON_CALL 是通話事件由系統設定的，不開放手動選擇，傳進來直接回 400。
+     *
+     * @param request status（新的工作狀態）；ON_CALL 回 400
+     */
     @Transactional
     public void updateStatus(UpdateAgentStatusRequest request) {
         Agent agent = agentRepository.findById(currentAgent.currentAgentId())

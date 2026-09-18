@@ -18,6 +18,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 工單建立與列表查詢的業務邏輯。
+ * <p>
+ * 提供的方法：
+ * <ul>
+ *   <li>{@link #createTicket(CreateTicketRequest, TicketChannel)}：建立工單並留下第一筆處理記錄</li>
+ *   <li>{@link #search(SearchTicketRequest)}：工單列表搜尋（分頁）</li>
+ * </ul>
+ * <p>
+ * 單張工單的詳情、改狀態、轉接在 {@link TicketDetailService}；這裡只管「開單」與「找單」。
+ */
 @Service
 @RequiredArgsConstructor
 public class TicketService {
