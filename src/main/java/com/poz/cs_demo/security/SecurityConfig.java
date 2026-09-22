@@ -4,12 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
@@ -34,6 +32,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtService jwtService;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     /**
      * 不需要登入就能存取的路徑。
@@ -64,9 +63,8 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
 
-                // TODO 步驟 8：換成自訂的 EntryPoint，回跟 GlobalExceptionHandler 一樣格式的 JSON。
-                .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                // 401 的回應內容交給 JwtAuthenticationEntryPoint，回跟 GlobalExceptionHandler 同格式的 JSON。
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
 
                 // 授權規則：由上往下逐條比對，第一條符合的生效，所以「放行」要寫在「要登入」前面。
                 .authorizeHttpRequests(auth -> auth

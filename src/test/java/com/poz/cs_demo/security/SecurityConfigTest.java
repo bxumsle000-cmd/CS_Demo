@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -23,7 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 所以 SecurityConfig 需要的 JwtService、JwtProperties 要手動帶進來（值來自 application.properties）。
  */
 @WebMvcTest(controllers = SecurityConfigTest.DummyController.class)
-@Import({SecurityConfig.class, JwtService.class, SecurityConfigTest.DummyController.class})
+@Import({SecurityConfig.class, JwtService.class, CurrentAgent.class, JwtAuthenticationEntryPoint.class,
+        SecurityConfigTest.DummyController.class})
 @EnableConfigurationProperties(JwtProperties.class)
 class SecurityConfigTest {
 
@@ -36,14 +40,21 @@ class SecurityConfigTest {
     /** 模擬受保護的 API 與登入端點，避免依賴真正的 Controller / Service */
     @RestController
     static class DummyController {
+        @Autowired CurrentAgent currentAgent;
+
         @GetMapping("/api/ping") String ping() { return "pong"; }
         @PostMapping("/api/auth/login") String login() { return "ok"; }
+        /** 回傳 CurrentAgent 認為的「現在是誰」，用來驗證整條鏈：Filter → SecurityContext → CurrentAgent */
+        @GetMapping("/api/whoami") String whoami() { return currentAgent.currentAgentId(); }
     }
 
     @Test
-    void 受保護的API_沒帶token_401() throws Exception {
+    void 受保護的API_沒帶token_401且body是ErrorResponse格式() throws Exception {
         mockMvc.perform(get("/api/ping"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("尚未登入或登入已失效"));
     }
 
     @Test
@@ -67,6 +78,15 @@ class SecurityConfigTest {
 
         mockMvc.perform(get("/api/ping").header("Authorization", "Bearer " + foreign))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 帶token_CurrentAgent取得的是token裡的agentId() throws Exception {
+        String token = jwtService.generateToken("CSC00002");
+
+        mockMvc.perform(get("/api/whoami").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(content().string("CSC00002"));
     }
 
     @Test

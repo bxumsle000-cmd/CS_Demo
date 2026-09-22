@@ -1,5 +1,6 @@
 package com.poz.cs_demo.exception;
 
+import com.poz.cs_demo.security.JwtAuthenticationEntryPoint;
 import com.poz.cs_demo.security.JwtProperties;
 import com.poz.cs_demo.security.JwtService;
 import com.poz.cs_demo.security.SecurityConfig;
@@ -31,13 +32,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <ul>
  *   <li>@Import SecurityConfig：@WebMvcTest 會載入 Spring Security，但不會掃到專案自己的 SecurityConfig，
  *       會退回「全部端點鎖住」的預設</li>
- *   <li>@Import JwtService + @EnableConfigurationProperties：SecurityConfig 需要它們，切片測試不會自動載入</li>
+ *   <li>@Import JwtService、JwtAuthenticationEntryPoint + @EnableConfigurationProperties：
+ *       SecurityConfig 需要它們，切片測試不會自動載入</li>
  *   <li>@WithMockUser：/test/** 不在放行名單內，要模擬「已登入」請求才進得到 Controller，
  *       否則會在 Security 層就被擋成 401，根本測不到 GlobalExceptionHandler</li>
  * </ul>
  */
 @WebMvcTest(controllers = GlobalExceptionHandlerTest.DummyController.class)
-@Import({GlobalExceptionHandler.class, SecurityConfig.class, JwtService.class, GlobalExceptionHandlerTest.DummyController.class})
+@Import({GlobalExceptionHandler.class, SecurityConfig.class, JwtService.class, JwtAuthenticationEntryPoint.class,
+        GlobalExceptionHandlerTest.DummyController.class})
 @EnableConfigurationProperties(JwtProperties.class)
 @WithMockUser
 class GlobalExceptionHandlerTest {

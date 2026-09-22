@@ -48,7 +48,7 @@ export function render(container) {
     try {
       const res = await api.login(agentId, password);
       setSession({ agentId: res.agentId, token: res.token });
-      // 後端目前的 CurrentAgent 寫死為 CSC00001，/me 回來的 agentId 以後端為準
+      // /me 會用剛拿到的 token 取回姓名與狀態
       try {
         const me = await api.me();
         patchSession({ agentId: me.agentId, name: me.name, status: me.status });

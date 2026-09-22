@@ -2,7 +2,7 @@
 // 後端 API 封裝。所有 fetch 都從這裡出去，頁面不直接碰 fetch。
 // 路徑對應 controller/*.java；錯誤統一轉成 ApiError（code + message）。
 // ============================================================
-import { getToken } from './state.js';
+import { getToken, clearSession } from './state.js';
 
 const BASE = '/api';
 
@@ -33,7 +33,7 @@ async function request(method, path, { body, query } = {}) {
 
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  // 後端目前用寫死的 CurrentAgent，還沒驗 token；先照規格帶上，之後接 JWT 就直接可用
+  // 登入後每個請求都帶 JWT，後端的 JwtAuthFilter 靠它辨認「現在是誰」
   const token = getToken();
   if (token) headers['Authorization'] = 'Bearer ' + token;
 
@@ -57,6 +57,13 @@ async function request(method, path, { body, query } = {}) {
 
   if (!res.ok) {
     const msg = (data && typeof data === 'object' && data.message) || `請求失敗（HTTP ${res.status}）`;
+    // 帶著 token 卻被回 401 → token 過期或失效：清掉 session 回登入頁。
+    // 排除登入 API 本身（帳密錯誤也是 401，那是要顯示在登入表單上的）。
+    // 這裡直接改 location.hash 而不 import app.js 的 navigate，避免 api.js ↔ app.js 循環 import。
+    if (res.status === 401 && token && path !== '/auth/login') {
+      clearSession();
+      location.hash = '#/login';
+    }
     throw new ApiError(res.status, msg);
   }
   return data;
