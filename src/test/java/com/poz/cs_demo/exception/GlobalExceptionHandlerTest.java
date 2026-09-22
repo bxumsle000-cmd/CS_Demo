@@ -1,5 +1,6 @@
 package com.poz.cs_demo.exception;
 
+import com.poz.cs_demo.security.SecurityConfig;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.Test;
@@ -21,9 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 只載入 web 層（不連資料庫），用一個測試專用 Controller 觸發各種例外，
  * 驗證 GlobalExceptionHandler 回傳的狀態碼與 JSON 內容。
+ * <p>
+ * 要一併 @Import SecurityConfig：@WebMvcTest 會載入 Spring Security，
+ * 但不會掃到專案自己的 SecurityConfig，會退回「全部端點鎖住」的預設，所有請求都變 401。
  */
 @WebMvcTest(controllers = GlobalExceptionHandlerTest.DummyController.class)
-@Import({GlobalExceptionHandler.class, GlobalExceptionHandlerTest.DummyController.class})
+@Import({GlobalExceptionHandler.class, SecurityConfig.class, GlobalExceptionHandlerTest.DummyController.class})
 class GlobalExceptionHandlerTest {
 
     @Autowired

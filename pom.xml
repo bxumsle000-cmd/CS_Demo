@@ -13,6 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
+        <jjwt.version>0.13.0</jjwt.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
@@ -64,10 +65,31 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <!--   密碼雜湊（BCrypt） -->
+        <!--   Spring Security：認證 / 授權框架，內含 spring-security-crypto（BCrypt）。
+               注意：一加進來預設會把所有端點鎖住，放行規則寫在 security/SecurityConfig。   -->
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!--   JJWT：產生 / 解析 JWT。
+               api 是編譯時要用的介面；impl、jackson 只在執行期需要（實作與 JSON 序列化），
+               所以 scope 設 runtime，程式碼裡不要直接 import impl 套件底下的東西。   -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <!--    Test    -->
         <dependency>
@@ -80,6 +102,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--   Spring Boot 4.x 同樣把 Security 的測試支援拆出來：
+               @WebMvcTest 預設不載入 Security 設定，要驗 SecurityConfig / JwtAuthFilter 需要加這個   -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-security-test</artifactId>
             <scope>test</scope>
         </dependency>
         <!--   lombok     -->

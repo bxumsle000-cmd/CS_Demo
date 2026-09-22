@@ -8,6 +8,7 @@ import com.poz.cs_demo.enums.AgentStatus;
 import com.poz.cs_demo.exception.ApiException;
 import com.poz.cs_demo.repository.AgentRepository;
 import com.poz.cs_demo.security.CurrentAgent;
+import com.poz.cs_demo.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,13 +30,16 @@ public class AuthService {
     private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
     private final CurrentAgent currentAgent;
-
+    private final JwtService jwtService;
 
     /**
-     * 登入：驗證帳號密碼，成功後把狀態設為 ONLINE 並回傳 token。
+     * 登入：驗證帳號密碼，成功後把狀態設為 ONLINE 並回傳 JWT。
+     * <p>
+     * 之後前端每次呼叫 API 都要在 Authorization header 帶這個 token，
+     * 後端靠它辨認「現在是誰」。
      *
      * @param request agentId（客服代號）、password（明碼密碼）
-     * @return agentId 與登入 token
+     * @return agentId 與 JWT token
      */
     @Transactional()
     public LoginResponse login(LoginRequest request) {
@@ -48,7 +52,8 @@ public class AuthService {
 
         agent.setStatus(AgentStatus.ONLINE);
 
-        return new LoginResponse(request.agentId(),currentAgent.currentToken());
+        String token = jwtService.generateToken(agent.getAgentId());
+        return new LoginResponse(agent.getAgentId(), token);
     }
 
     /**
