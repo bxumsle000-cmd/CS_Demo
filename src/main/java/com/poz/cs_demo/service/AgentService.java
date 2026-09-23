@@ -35,6 +35,7 @@ public class AgentService {
 
     /**
      * 建立客服帳號：代號不可重複，密碼會先做 BCrypt 雜湊再存。
+     * 新帳號還沒登入過，狀態為 OFFLINE，登入時才改成 ONLINE。
      *
      * @param request agentId（客服代號）、name（姓名）、password（明碼密碼）
      */
@@ -48,6 +49,7 @@ public class AgentService {
                 .agentId(request.agentId())
                 .name(request.name())
                 .passwordHash(passwordEncoder.encode(request.password()))
+                .status(AgentStatus.OFFLINE)
                 .build();
         agentRepository.save(agent);
     }

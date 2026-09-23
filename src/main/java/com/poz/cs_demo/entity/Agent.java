@@ -43,11 +43,12 @@ public class Agent {
      * 目前工作狀態。
      * JPA 每次 INSERT 都會把所有欄位送出去，資料庫的 DEFAULT 不會生效，
      * 所以預設值在 Java 這邊給（Builder 也要用 @Builder.Default 才會套用）。
+     * 預設 OFFLINE：新帳號還沒登入過，登入時才改成 ONLINE（見 AuthService.login）。
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     @Builder.Default
-    private AgentStatus status = AgentStatus.ONLINE;
+    private AgentStatus status = AgentStatus.OFFLINE;
 
     /** 帳號建立時間，建立後不再更動 */
     @Column(name = "created_at", nullable = false, updatable = false)
