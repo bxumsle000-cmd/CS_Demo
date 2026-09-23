@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -26,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 所以 SecurityConfig 需要的 JwtService、JwtProperties 要手動帶進來（值來自 application.properties）。
  */
 @WebMvcTest(controllers = SecurityConfigTest.DummyController.class)
-@Import({SecurityConfig.class, JwtService.class, CurrentAgent.class, JwtAuthenticationEntryPoint.class,
+@Import({SecurityConfig.class, JwtService.class, CurrentAgent.class,
         SecurityConfigTest.DummyController.class})
 @EnableConfigurationProperties(JwtProperties.class)
 class SecurityConfigTest {
@@ -49,12 +47,11 @@ class SecurityConfigTest {
     }
 
     @Test
-    void 受保護的API_沒帶token_401且body是ErrorResponse格式() throws Exception {
+    void 受保護的API_沒帶token_401且body是空的() throws Exception {
+        // 用的是內建 HttpStatusEntryPoint：只回狀態碼，不寫 body
         mockMvc.perform(get("/api/ping"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value(401))
-                .andExpect(jsonPath("$.message").value("尚未登入或登入已失效"));
+                .andExpect(content().string(""));
     }
 
     @Test
