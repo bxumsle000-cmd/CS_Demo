@@ -57,10 +57,22 @@ public class AuthService {
     }
 
     /**
-     * 登出（尚未實作）。
+     * 登出：把目前登入者的狀態改成 OFFLINE。
+     * <p>
+     * 這裡<b>不會</b>讓 token 失效。JWT 是無狀態的，後端沒有保存任何已發出的 token，
+     * 所以沒東西可以刪；真正讓使用者登出的動作是前端把 token 清掉
+     * （見 static/js/state.js 的 clearSession）。
+     * 這支的作用只是更新工作狀態，讓其他人分得出「在線上」和「已下班」。
+     * 那顆 token 在 jwt.expiration-ms 到期前仍然是有效的。
      */
     @Transactional
-    public void logout(){
+    public void logout() {
+        Agent agent = agentRepository.findById(currentAgent.currentAgentId())
+                .orElseThrow(() -> ApiException.unauthorized("登入已失效"));
+
+        // 交易內從 findById 取出的 entity 是被 JPA 管理的，
+        // 改完欄位交易結束會自動寫回，不必呼叫 save()（寫法同上面的 login）。
+        agent.setStatus(AgentStatus.OFFLINE);
     }
 
     /**

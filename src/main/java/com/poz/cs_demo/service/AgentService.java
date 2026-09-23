@@ -77,9 +77,9 @@ public class AgentService {
     /**
      * 變更目前登入者自己的工作狀態（BREAK / RESTROOM / LUNCH / MEETING 或回到 ONLINE）。
      * <p>
-     * ON_CALL 是通話事件由系統設定的，不開放手動選擇，傳進來直接回 400。
+     * ON_CALL 由通話事件設定、OFFLINE 由登出設定，兩者都不開放手動選擇，傳進來直接回 400。
      *
-     * @param request status（新的工作狀態）；ON_CALL 回 400
+     * @param request status（新的工作狀態）；ON_CALL 或 OFFLINE 回 400
      */
     @Transactional
     public void updateStatus(UpdateAgentStatusRequest request) {
@@ -88,6 +88,10 @@ public class AgentService {
 
         if (request.status() == AgentStatus.ON_CALL) {
             throw ApiException.badRequest("ON_CALL 由系統設定，不可手動選擇");
+        }
+
+        if (request.status() == AgentStatus.OFFLINE) {
+            throw ApiException.badRequest("OFFLINE 由登出設定，不可手動選擇");
         }
 
         agent.setStatus(request.status());

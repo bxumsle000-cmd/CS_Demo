@@ -30,9 +30,10 @@ export const AGENT_STATUS = {
   RESTROOM: '廁所',
   LUNCH: '午休',
   MEETING: '簡報',
+  OFFLINE: '離線',
 };
 
-/** 客服可以手動切換的狀態（ON_CALL 由系統控制，後端會擋） */
+/** 客服可以手動切換的狀態（ON_CALL 由通話事件、OFFLINE 由登出設定，後端都會擋） */
 export const MANUAL_AGENT_STATUSES = ['ONLINE', 'BREAK', 'RESTROOM', 'LUNCH', 'MEETING'];
 
 export const CHANNEL = {

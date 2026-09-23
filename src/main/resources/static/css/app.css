@@ -77,6 +77,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 .dot.RESTROOM { background: var(--orange); }
 .dot.LUNCH { background: var(--yellow); }
 .dot.MEETING { background: #a78bfa; }
+.dot.OFFLINE { background: var(--muted); }  /* 與 .dot 的預設色相同，列出來只是讓狀態清單完整 */
 
 /* ---------- 按鈕 ---------- */
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--card-2); color: var(--text); white-space: nowrap; }
