@@ -31,7 +31,3 @@ docker compose up -d
 ### Demo 帳號
 
 `CSC00001` ～ `CSC00005`，密碼都是 `pass1234`。
-
-## 文件
-
-- [C4 架構圖](c4/README.md)
