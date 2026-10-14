@@ -59,7 +59,7 @@ async function request(method, path, { body, query } = {}) {
     const msg = (data && typeof data === 'object' && data.message) || `請求失敗（HTTP ${res.status}）`;
     // 帶著 token 卻被回 401 → token 過期或失效：清掉 session 回登入頁。
     // 排除登入 API 本身（帳密錯誤也是 401，那是要顯示在登入表單上的）。
-    // 這裡直接改 location.hash 而不 import app.js 的 navigate，避免 api.js ↔ app.js 循環 import。
+    // api.js 不是元件，用不了 useNavigate，所以直接改 location.hash；HashRouter 會跟著換頁。
     if (res.status === 401 && token && path !== '/auth/login') {
       clearSession();
       location.hash = '#/login';
@@ -79,7 +79,6 @@ export const api = {
 
   // ---- AgentController ----
   updateMyStatus: (status) => request('PUT', '/agents/me/status', { body: { status } }),
-  register: (agentId, name, password) => request('POST', '/agents/register', { body: { agentId, name, password } }),
   changePassword: (oldPassword, newPassword) => request('PUT', '/agents/me/password', { body: { oldPassword, newPassword } }),
 
   // ---- TicketController ----

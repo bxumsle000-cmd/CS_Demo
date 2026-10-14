@@ -50,6 +50,9 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 .callbar .sub { font-size: 12px; color: var(--muted); }
 .callbar-right { display: flex; align-items: center; gap: 12px; }
 .callbar .timer { font-size: 18px; color: var(--link); font-variant-numeric: tabular-nums; }
+/* 已掛斷、工單還沒送出：變灰，表示電話已經不在線上 */
+.callbar.ended .phone-icon { background: #1c1c22; color: var(--muted); }
+.callbar.ended .number, .callbar.ended .timer { color: var(--muted); }
 .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-strong); background: #1a1a20; color: var(--text); display: grid; place-items: center; font-size: 15px; }
 .icon-btn.mute-on { background: #fff; color: #000; }
 .icon-btn.hangup { background: var(--danger); border-color: var(--danger); color: #fff; }
