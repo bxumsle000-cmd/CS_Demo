@@ -1,6 +1,7 @@
 package com.poz.cs_demo.dto.detail;
 
 import com.poz.cs_demo.enums.TicketStatus;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 工單詳情頁「變更工單狀態」的請求。
@@ -10,6 +11,7 @@ import com.poz.cs_demo.enums.TicketStatus;
  * @param status 新狀態：待客戶回覆 = PENDING、已解決 = RESOLVED、處理中 = IN_PROGRESS
  */
 public record UpdateTicketStatusRequest(
+        @NotNull(message = "不可為空")
         TicketStatus status
 ) {
 }

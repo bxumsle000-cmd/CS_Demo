@@ -1,6 +1,9 @@
 package com.poz.cs_demo.dto.ticket;
 
 import com.poz.cs_demo.enums.TicketStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * 通話工作台「建立工單並結束通話」的請求，欄位對應畫面上的「本次通話工單」表單。
@@ -20,12 +23,26 @@ import com.poz.cs_demo.enums.TicketStatus;
  * @param status       通話結果：已解決 = RESOLVED、需再追蹤 = IN_PROGRESS、待客戶回覆 = PENDING
  */
 public record CreateTicketRequest(
+        @NotBlank(message = "不可為空")
+        @Size(max = 50, message = "長度不可超過 50 字")
         String title,
+
+        @Size(max = 255, message = "長度不可超過 255 字")
         String customerName,
+
+        @Size(max = 50, message = "長度不可超過 50 字")
         String contactPhone,
+
+        @NotBlank(message = "不可為空")
+        @Size(max = 255, message = "長度不可超過 255 字")
         String category,
+
+        @Size(max = 10, message = "長度不可超過 10 字")
         String assigneeId,
+
         String description,
+
+        @NotNull(message = "不可為空")
         TicketStatus status
 ) {
 }

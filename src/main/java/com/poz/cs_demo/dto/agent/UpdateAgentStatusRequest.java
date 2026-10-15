@@ -1,6 +1,7 @@
 package com.poz.cs_demo.dto.agent;
 
 import com.poz.cs_demo.enums.AgentStatus;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 客服變更自己工作狀態的請求。
@@ -9,6 +10,7 @@ import com.poz.cs_demo.enums.AgentStatus;
  * @param status 新的工作狀態；ON_CALL 由系統設定，不可手動選擇
  */
 public record UpdateAgentStatusRequest(
+    @NotNull(message = "不可為空")
     AgentStatus status
 ) {
 }

@@ -6,6 +6,7 @@ import com.poz.cs_demo.dto.detail.UpdateTicketAssigneeRequest;
 import com.poz.cs_demo.dto.detail.UpdateTicketStatusRequest;
 import com.poz.cs_demo.repository.TicketCommentRepository;
 import com.poz.cs_demo.service.TicketDetailService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,21 +28,21 @@ public class TicketDetailController {
     /** 變更工單狀態（標記為「待客戶回覆」/「已解決」） */
     @PutMapping("/status")
     public TicketDetailResponse updateStatus(@PathVariable String ticketNo,
-                                             @RequestBody UpdateTicketStatusRequest request) {
+                                             @Valid @RequestBody UpdateTicketStatusRequest request) {
         return ticketDetailService.updateStatus(ticketNo,request);
     }
 
     /** 轉派給其他客服 */
     @PutMapping("/assignee")
     public TicketDetailResponse reassign(@PathVariable String ticketNo,
-                                         @RequestBody UpdateTicketAssigneeRequest request) {
+                                         @Valid @RequestBody UpdateTicketAssigneeRequest request) {
         return ticketDetailService.assign(ticketNo , request);
     }
 
     /** 新增處理記錄 */
     @PostMapping("/comments")
     public TicketDetailResponse addComment(@PathVariable String ticketNo,
-                           @RequestBody AddTicketCommentRequest request) {
+                           @Valid @RequestBody AddTicketCommentRequest request) {
         return ticketDetailService.addComment(ticketNo,request);
     }
 }

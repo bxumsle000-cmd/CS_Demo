@@ -1,5 +1,9 @@
 package com.poz.cs_demo.dto.followup;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 
 /**
@@ -17,8 +21,13 @@ import java.time.LocalDateTime;
  * @param note       個人備註，只有主人看得到；可為 null，對應 follow_ups.note NVARCHAR(200)
  */
 public record CreateFollowUpRequest(
+        @NotBlank(message = "不可為空")
         String ticketNo,
+
+        @NotNull(message = "不可為空")
         LocalDateTime followUpAt,
+
+        @Size(max = 200, message = "長度不可超過 200 字")
         String note
 ) {
 }

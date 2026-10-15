@@ -1,5 +1,7 @@
 package com.poz.cs_demo.dto.followup;
 
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -16,9 +18,18 @@ import java.time.LocalDateTime;
  * @param to   結束日期（含）
  */
 public record FollowUpGetListRequest(
-        @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
-        @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to
+        @NotNull(message = "不可為空") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
+        @NotNull(message = "不可為空") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to
 ) {
+    /**
+     * 起始日不可晚於結束日。方法名要以 is 開頭，Bean Validation 才會把它當成要檢查的屬性；
+     * 有一邊是 null 時交給 @NotNull 處理，這裡直接放行，避免同一個錯誤報兩次。
+     */
+    @AssertTrue(message = "起始日期不可晚於結束日期")
+    public boolean isDateRangeValid() {
+        return from == null || to == null || !from.isAfter(to);
+    }
+
     /** 起始日 00:00:00（含） */
     public LocalDateTime fromInclusive() {
         return from.atStartOfDay();

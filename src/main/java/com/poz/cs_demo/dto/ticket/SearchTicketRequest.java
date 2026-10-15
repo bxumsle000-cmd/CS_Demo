@@ -1,6 +1,8 @@
 package com.poz.cs_demo.dto.ticket;
 
 import com.poz.cs_demo.enums.TicketStatus;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,7 +28,7 @@ import java.time.LocalDateTime;
  * @param updatedFrom  起始日期（含），依更新時間過濾；null = 不限起始
  * @param updatedTo    結束日期（含），依更新時間過濾；null = 不限結束
  * @param page         頁碼，從 0 開始；沒帶預設 0
- * @param size         每頁筆數；沒帶預設 10
+ * @param size         每頁筆數；沒帶預設 10，最多 100
  */
 public record SearchTicketRequest(
         String ticketNo,
@@ -37,6 +39,7 @@ public record SearchTicketRequest(
         @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate updatedFrom,
         @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate updatedTo,
         Integer page,
+        @Max(value = 100, message = "每頁最多 100 筆")
         Integer size
 ) {
     private static final int DEFAULT_PAGE = 0;
@@ -50,6 +53,15 @@ public record SearchTicketRequest(
         assigneeId = blankToNull(assigneeId);
         page = (page == null || page < 0) ? DEFAULT_PAGE : page;
         size = (size == null || size < 10) ? DEFAULT_SIZE : size;
+    }
+
+    /**
+     * 起始日不可晚於結束日；有一邊沒填就不限制。
+     * 方法名要以 is 開頭，Bean Validation 才會把它當成要檢查的屬性。
+     */
+    @AssertTrue(message = "起始日期不可晚於結束日期")
+    public boolean isUpdatedRangeValid() {
+        return updatedFrom == null || updatedTo == null || !updatedFrom.isAfter(updatedTo);
     }
 
     private static String blankToNull(String value) {

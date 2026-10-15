@@ -5,6 +5,7 @@ import com.poz.cs_demo.dto.followup.CreateFollowUpRequest;
 import com.poz.cs_demo.dto.followup.FollowUpGetListRequest;
 import com.poz.cs_demo.dto.followup.FollowUpGetListResponse;
 import com.poz.cs_demo.service.FollowUpService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class FollowUpController {
 
     /** 查詢區間內的回電安排（from、to 為 query 參數） */
     @GetMapping
-    public List<FollowUpGetListResponse> list(FollowUpGetListRequest request) {
+    public List<FollowUpGetListResponse> list(@Valid FollowUpGetListRequest request) {
         return followUpService.getList(request);
     }
 
@@ -32,7 +33,7 @@ public class FollowUpController {
 
     /** 加入案件到某一天（同一張工單已有安排則覆蓋） */
     @PostMapping
-    public void create(@RequestBody CreateFollowUpRequest request) {
+    public void create(@Valid @RequestBody CreateFollowUpRequest request) {
         followUpService.createFollowUp(request);
     }
 

@@ -4,6 +4,7 @@ import com.poz.cs_demo.dto.agent.AgentResponse;
 import com.poz.cs_demo.dto.auth.LoginRequest;
 import com.poz.cs_demo.dto.auth.LoginResponse;
 import com.poz.cs_demo.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class AuthController {
     private final AuthService authService;
     /** 登入 */
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 

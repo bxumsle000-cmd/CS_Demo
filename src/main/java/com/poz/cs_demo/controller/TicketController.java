@@ -6,6 +6,7 @@ import com.poz.cs_demo.dto.ticket.SearchTicketRequest;
 import com.poz.cs_demo.dto.ticket.SearchTicketResponse;
 import com.poz.cs_demo.enums.TicketChannel;
 import com.poz.cs_demo.service.TicketService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
@@ -28,7 +29,7 @@ public class TicketController {
      * 由 Spring 自動綁進 SearchTicketRequest，皆為選填。
      */
     @GetMapping
-    public Page<SearchTicketResponse> search(SearchTicketRequest request) {
+    public Page<SearchTicketResponse> search(@Valid SearchTicketRequest request) {
         return ticketService.search(request);
     }
 
@@ -43,13 +44,13 @@ public class TicketController {
 
     /** 建立工單 from call */
     @PostMapping("/from-call")
-    public void createFromCall(@RequestBody CreateTicketRequest request) {
+    public void createFromCall(@Valid @RequestBody CreateTicketRequest request) {
         ticketService.createTicket(request, TicketChannel.PHONE);
     }
 
     /** 建立工單 from agent*/
     @PostMapping("/from-agent")
-    public void createFromAgent(@RequestBody CreateTicketRequest request) {
+    public void createFromAgent(@Valid @RequestBody CreateTicketRequest request) {
         ticketService.createTicket(request, TicketChannel.AGENT);
     }
 }
